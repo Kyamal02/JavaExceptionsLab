@@ -44,6 +44,10 @@ public class Main {
                     robot.move(command);
                     writer.write("Команда выполнена: " + line + "\n");
                     writer.write("Положение робота: (" + robot.getX() + ", " + robot.getY() + ")\n");
+                } catch (InvalidCommandFormatException e) {
+                    writer.write("Некорректный формат команды: " + line + "\n");
+                    writer.write("Описание: " + e.getMessage() + "\n");
+
                 } catch (ZeroStepException e) {
                     writer.write("Команда пропущена (нулевые шаги): " + line + "\n");
                     writer.write("Описание: " + e.getMessage() + "\n");

@@ -20,10 +20,17 @@ public class RobotCommandProcessor {
      */
     public Command parseCommand(String line) throws RobotException {
         // Разбиваем строку на части по пробелам
-        String[] parts = line.trim().split("\\s+");
+        // Удаляем начальные и конечные пробелы и проверяем, что строка не пустая
+        line = line.trim();
+        if (line.isEmpty()) {
+            throw new InvalidCommandFormatException("Пустая строка недопустима как команда.");
+        }
+
+        // Разбиваем строку на части по пробелам
+        String[] parts = line.split("\\s+");
         if (parts.length != 2) {
             // Некорректный формат команды
-            return null;
+            throw new InvalidCommandFormatException("Некорректный формат команды: " + line);
         }
 
         String direction = parts[0];
