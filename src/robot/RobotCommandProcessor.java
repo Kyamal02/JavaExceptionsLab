@@ -1,5 +1,6 @@
 package robot;
 
+import exceptions.InvalidDirectionException;
 import exceptions.InvalidSymbolException;
 import exceptions.RobotException;
 
@@ -24,12 +25,17 @@ public class RobotCommandProcessor {
         String direction = parts[0];
         String stepsStr = parts[1];
 
-        // Проверяем, что направление является одним из разрешённых символов
+        // Проверяем, что направление состоит из одной заглавной буквы
+        if (!direction.matches("[A-Z]")) {
+            throw new InvalidSymbolException("Недопустимое направление: " + direction);
+        }
+
+        // Проверяем, что направление — одна из букв N, S, E, W
         if (!direction.equals("N") && !direction.equals("S") &&
                 !direction.equals("E") && !direction.equals("W")) {
-            // Если направление не является N, S, E или W, выбрасываем исключение
-            throw new InvalidSymbolException("Недопустимый символ направления: " + direction);
+            throw new InvalidDirectionException("Недопустимая заглавная буква направления: " + direction);
         }
+
 
         // Остальная часть кода будет добавлена позже
 

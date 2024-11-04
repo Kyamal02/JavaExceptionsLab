@@ -1,8 +1,9 @@
+import exceptions.InvalidDirectionException;
+import exceptions.InvalidSymbolException;
+import exceptions.RobotException;
 import robot.Robot;
 import robot.Command;
 import robot.RobotCommandProcessor;
-import exceptions.RobotException;
-import exceptions.InvalidSymbolException;
 
 import java.io.*;
 
@@ -44,26 +45,33 @@ public class Main {
                 try {
                     // Обработка команды
                     Command command = processor.parseCommand(line);
-                    robot.move(command);
                     writer.write("Команда выполнена: " + line + "\n");
                     writer.write("Положение робота: (" + robot.getX() + ", " + robot.getY() + ")\n");
+
+                } catch (InvalidDirectionException e) {
+                    // Обработка исключения InvalidDirectionException
+                    writer.write("Ошибка при выполнении команды: " + line + "\n");
+                    writer.write("Описание ошибки: " + e.getMessage() + "\n");
+                    throw e;
+
                 } catch (InvalidSymbolException e) {
                     // Обработка исключения InvalidSymbolException
                     writer.write("Ошибка при выполнении команды: " + line + "\n");
                     writer.write("Описание ошибки: " + e.getMessage() + "\n");
-                    throw new RuntimeException(e.getMessage());
+                    throw e;
                 } catch (RobotException e) {
-                    // Обработка других исключений RobotException (будет добавлена позже)
+                    // Обработка других исключений RobotException
                     writer.write("Ошибка при выполнении команды: " + line + "\n");
                     writer.write("Описание ошибки: " + e.getMessage() + "\n");
-                    throw new RuntimeException(e.getMessage());
+                    throw e;
                 }
+
                 writer.write("\n");
             }
 
             writer.write("Конечное положение робота: (" + robot.getX() + ", " + robot.getY() + ")\n");
 
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
