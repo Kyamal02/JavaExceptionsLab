@@ -2,6 +2,7 @@ package robot;
 
 import exceptions.InvalidDirectionException;
 import exceptions.InvalidSymbolException;
+import exceptions.LowercaseDirectionException;
 import exceptions.RobotException;
 
 /**
@@ -25,20 +26,28 @@ public class RobotCommandProcessor {
         String direction = parts[0];
         String stepsStr = parts[1];
 
-        // Проверяем, что направление состоит из одной заглавной буквы
-        if (!direction.matches("[A-Z]")) {
+        // Проверяем, что направление состоит из одной буквы
+        if (!direction.matches("[a-zA-Z]")) {
             throw new InvalidSymbolException("Недопустимое направление: " + direction);
         }
 
-        // Проверяем, что направление — одна из букв N, S, E, W
-        if (!direction.equals("N") && !direction.equals("S") &&
-                !direction.equals("E") && !direction.equals("W")) {
-            throw new InvalidDirectionException("Недопустимая заглавная буква направления: " + direction);
+        // Проверка, если направление — строчная буква (и одна из "n", "s", "e", "w")
+        if (direction.matches("[nsew]")) {
+            String originalDirection = direction; // Сохраняем исходное направление
+            String correctedDirection = direction.toUpperCase(); // Преобразуем в заглавную букву
+            throw new LowercaseDirectionException(
+                    "Направление '" + originalDirection + "' было преобразовано в '" + correctedDirection + "'",
+                    correctedDirection
+            );
         }
 
+        // Проверка, если буква не является одной из допустимых заглавных букв
+        if (!direction.equals("N") && !direction.equals("S") &&
+                !direction.equals("E") && !direction.equals("W")) {
+            throw new InvalidDirectionException("Недопустимое направление: " + direction);
+        }
 
-        // Остальная часть кода будет добавлена позже
-
-        return null; // Временный возврат
+        // Остальная часть кода (например, проверка шагов) будет добавлена позже
+        return new Command(direction, Integer.parseInt(stepsStr)); // временно возвращаем объект Command
     }
 }
