@@ -1,9 +1,6 @@
 package robot;
 
-import exceptions.InvalidDirectionException;
-import exceptions.InvalidSymbolException;
-import exceptions.LowercaseDirectionException;
-import exceptions.RobotException;
+import exceptions.*;
 
 /**
  * Класс для обработки команд из файла.
@@ -26,6 +23,15 @@ public class RobotCommandProcessor {
         String direction = parts[0];
         String stepsStr = parts[1];
 
+        // Проверка на несколько допустимых символов
+        if (direction.matches("[NSEW]{2,}")) {
+            String[] individualDirections = direction.split(""); // Разделение на отдельные символы
+            throw new MultipleDirectionsException(
+                    "Обнаружено несколько направлений: " + direction,
+                    individualDirections
+            );
+        }
+
         // Проверяем, что направление состоит из одной буквы
         if (!direction.matches("[a-zA-Z]")) {
             throw new InvalidSymbolException("Недопустимое направление: " + direction);
@@ -33,8 +39,8 @@ public class RobotCommandProcessor {
 
         // Проверка, если направление — строчная буква (и одна из "n", "s", "e", "w")
         if (direction.matches("[nsew]")) {
-            String originalDirection = direction; // Сохраняем исходное направление
-            String correctedDirection = direction.toUpperCase(); // Преобразуем в заглавную букву
+            String originalDirection = direction;
+            String correctedDirection = direction.toUpperCase();
             throw new LowercaseDirectionException(
                     "Направление '" + originalDirection + "' было преобразовано в '" + correctedDirection + "'",
                     correctedDirection
@@ -46,6 +52,7 @@ public class RobotCommandProcessor {
                 !direction.equals("E") && !direction.equals("W")) {
             throw new InvalidDirectionException("Недопустимое направление: " + direction);
         }
+
 
         // Остальная часть кода (например, проверка шагов) будет добавлена позже
         return new Command(direction, Integer.parseInt(stepsStr)); // временно возвращаем объект Command

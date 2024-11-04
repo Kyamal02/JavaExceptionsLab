@@ -1,7 +1,4 @@
-import exceptions.InvalidDirectionException;
-import exceptions.InvalidSymbolException;
-import exceptions.LowercaseDirectionException;
-import exceptions.RobotException;
+import exceptions.*;
 import robot.Robot;
 import robot.Command;
 import robot.RobotCommandProcessor;
@@ -63,6 +60,18 @@ public class Main {
                     writer.write("Команда выполнена (после исправления): " + correctedCommand.getDirection() + " " + correctedCommand.getSteps() + "\n");
                     writer.write("Положение робота: (" + robot.getX() + ", " + robot.getY() + ")\n");
 
+                } catch (MultipleDirectionsException e) {
+                    // Обработка случая нескольких направлений в одной команде
+                    String[] directions = e.getIndividualDirections();
+                    int steps = Integer.parseInt(line.split("\\s+")[1]);
+
+                    writer.write("Обнаружено несколько направлений в команде: " + line + "\n");
+                    for (String dir : directions) {
+                        Command splitCommand = new Command(dir, steps);
+                        robot.move(splitCommand);
+                        writer.write("Команда выполнена: " + dir + " " + steps + "\n");
+                        writer.write("Положение робота: (" + robot.getX() + ", " + robot.getY() + ")\n");
+                    }
                 } catch (InvalidDirectionException e) {
                     // Обработка некорректного направления
                     writer.write("Ошибка при выполнении команды: " + line + "\n");
