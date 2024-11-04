@@ -6,6 +6,12 @@ import exceptions.*;
  * Класс для обработки команд из файла.
  */
 public class RobotCommandProcessor {
+    private final int maxSteps; // Значение K
+
+    public RobotCommandProcessor(int maxSteps) {
+        this.maxSteps = maxSteps;
+    }
+
     /**
      * Метод для разбора строки команды и создания объекта Command.
      * @param line Строка команды.
@@ -23,12 +29,23 @@ public class RobotCommandProcessor {
         String direction = parts[0];
         String stepsStr = parts[1];
 
-        // Проверяем, что шаги представляют собой целое число
         int steps;
         try {
             steps = Integer.parseInt(stepsStr);
         } catch (NumberFormatException e) {
             throw new InvalidStepException("Шаги не являются допустимым числом: " + stepsStr);
+        }
+        if (Math.abs(steps) > maxSteps) {
+            throw new StepLimitExceededException(
+                    "Количество шагов превышает максимально допустимое значение: " + steps,
+                    maxSteps,
+                    steps
+            );
+        }
+
+        // Проверка на нулевые шаги
+        if (steps == 0) {
+            throw new ZeroStepException("Количество шагов не может быть нулевым.");
         }
 
         // Проверка на несколько допустимых символов
@@ -65,11 +82,20 @@ public class RobotCommandProcessor {
         if (steps < 0) {
             String correctedDirection;
             switch (direction) {
-                case "N": correctedDirection = "S"; break;
-                case "S": correctedDirection = "N"; break;
-                case "E": correctedDirection = "W"; break;
-                case "W": correctedDirection = "E"; break;
-                default: throw new InvalidDirectionException("Недопустимое направление: " + direction);
+                case "N":
+                    correctedDirection = "S";
+                    break;
+                case "S":
+                    correctedDirection = "N";
+                    break;
+                case "E":
+                    correctedDirection = "W";
+                    break;
+                case "W":
+                    correctedDirection = "E";
+                    break;
+                default:
+                    throw new InvalidDirectionException("Недопустимое направление: " + direction);
             }
             throw new NegativeStepException(
                     "Отрицательные шаги преобразованы: " + direction + " " + steps + " -> " + correctedDirection + " " + (-steps),

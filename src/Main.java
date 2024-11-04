@@ -29,7 +29,8 @@ public class Main {
             }
 
             Robot robot = new Robot(x, y);
-            RobotCommandProcessor processor = new RobotCommandProcessor();
+            //задаем K
+            RobotCommandProcessor processor = new RobotCommandProcessor(10);
             String line;
 
             while ((line = reader.readLine()) != null) {
@@ -43,6 +44,15 @@ public class Main {
                     robot.move(command);
                     writer.write("Команда выполнена: " + line + "\n");
                     writer.write("Положение робота: (" + robot.getX() + ", " + robot.getY() + ")\n");
+                } catch (ZeroStepException e) {
+                    writer.write("Команда пропущена (нулевые шаги): " + line + "\n");
+                    writer.write("Описание: " + e.getMessage() + "\n");
+                    // Команда не выполняется и удаляется из списка (ничего не делаем)
+
+                } catch (StepLimitExceededException e) {
+                    writer.write("Команда не выполнена: " + line + "\n");
+                    writer.write("Описание: " + e.getMessage() + "\n");
+                    // Команда не выполняется
 
                 } catch (LowercaseDirectionException e) {
                     String correctedDirection = e.getCorrectedDirection();
@@ -52,6 +62,7 @@ public class Main {
                     robot.move(correctedCommand);
                     writer.write("Команда выполнена (после исправления): " + correctedCommand.getDirection() + " " + correctedCommand.getSteps() + "\n");
                     writer.write("Положение робота: (" + robot.getX() + ", " + robot.getY() + ")\n");
+
                 } catch (NegativeStepException e) {
                     String correctedDirection = e.getCorrectedDirection();
                     int correctedSteps = e.getCorrectedSteps();
@@ -73,10 +84,18 @@ public class Main {
                         if (currentSteps < 0) {
                             String correctedDirection;
                             switch (currentDir) {
-                                case "N": correctedDirection = "S"; break;
-                                case "S": correctedDirection = "N"; break;
-                                case "E": correctedDirection = "W"; break;
-                                case "W": correctedDirection = "E"; break;
+                                case "N":
+                                    correctedDirection = "S";
+                                    break;
+                                case "S":
+                                    correctedDirection = "N";
+                                    break;
+                                case "E":
+                                    correctedDirection = "W";
+                                    break;
+                                case "W":
+                                    correctedDirection = "E";
+                                    break;
                                 default:
                                     writer.write("Недопустимое направление: " + currentDir + "\n");
                                     continue;
@@ -91,6 +110,7 @@ public class Main {
                         robot.move(splitCommand);
                         writer.write("Команда выполнена: " + currentDir + " " + currentSteps + "\n");
                         writer.write("Положение робота: (" + robot.getX() + ", " + robot.getY() + ")\n");
+
                     }
                 } catch (InvalidStepException e) {
                     writer.write("Ошибка при выполнении команды: " + line + "\n");
