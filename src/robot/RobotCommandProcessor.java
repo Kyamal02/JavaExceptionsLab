@@ -30,12 +30,14 @@ public class RobotCommandProcessor {
         } catch (NumberFormatException e) {
             throw new InvalidStepException("Шаги не являются допустимым числом: " + stepsStr);
         }
+
         // Проверка на несколько допустимых символов
         if (direction.matches("[NSEW]{2,}")) {
             String[] individualDirections = direction.split("");
             throw new MultipleDirectionsException(
                     "Обнаружено несколько направлений: " + direction,
-                    individualDirections
+                    individualDirections,
+                    steps
             );
         }
 
@@ -44,23 +46,39 @@ public class RobotCommandProcessor {
             throw new InvalidSymbolException("Недопустимое направление: " + direction);
         }
 
-        // Проверка, если направление — строчная буква (и одна из "n", "s", "e", "w")
+        // Проверка на строчные буквы направления
         if (direction.matches("[nsew]")) {
-            String originalDirection = direction;
             String correctedDirection = direction.toUpperCase();
             throw new LowercaseDirectionException(
-                    "Направление '" + originalDirection + "' было преобразовано в '" + correctedDirection + "'",
+                    "Направление '" + direction + "' было преобразовано в '" + correctedDirection + "'",
                     correctedDirection
             );
         }
 
-        // Проверка, если буква не является одной из допустимых заглавных букв
+        // Проверка на недопустимые заглавные буквы
         if (!direction.equals("N") && !direction.equals("S") &&
                 !direction.equals("E") && !direction.equals("W")) {
             throw new InvalidDirectionException("Недопустимое направление: " + direction);
         }
 
+        // Проверка на отрицательные шаги
+        if (steps < 0) {
+            String correctedDirection;
+            switch (direction) {
+                case "N": correctedDirection = "S"; break;
+                case "S": correctedDirection = "N"; break;
+                case "E": correctedDirection = "W"; break;
+                case "W": correctedDirection = "E"; break;
+                default: throw new InvalidDirectionException("Недопустимое направление: " + direction);
+            }
+            throw new NegativeStepException(
+                    "Отрицательные шаги преобразованы: " + direction + " " + steps + " -> " + correctedDirection + " " + (-steps),
+                    correctedDirection,
+                    -steps
+            );
+        }
 
         return new Command(direction, steps);
     }
+
 }

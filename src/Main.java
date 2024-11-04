@@ -52,15 +52,44 @@ public class Main {
                     robot.move(correctedCommand);
                     writer.write("Команда выполнена (после исправления): " + correctedCommand.getDirection() + " " + correctedCommand.getSteps() + "\n");
                     writer.write("Положение робота: (" + robot.getX() + ", " + robot.getY() + ")\n");
+                } catch (NegativeStepException e) {
+                    String correctedDirection = e.getCorrectedDirection();
+                    int correctedSteps = e.getCorrectedSteps();
+                    Command correctedCommand = new Command(correctedDirection, correctedSteps);
+                    writer.write("Исправление команды: " + line + " на " + correctedDirection + " " + correctedSteps + "\n");
+                    robot.move(correctedCommand);
+                    writer.write("Команда выполнена (после исправления): " + correctedCommand.getDirection() + " " + correctedCommand.getSteps() + "\n");
+                    writer.write("Положение робота: (" + robot.getX() + ", " + robot.getY() + ")\n");
 
                 } catch (MultipleDirectionsException e) {
                     String[] directions = e.getIndividualDirections();
-                    int steps = Integer.parseInt(line.split("\\s+")[1]);
+                    int steps = e.getSteps();
                     writer.write("Обнаружено несколько направлений в команде: " + line + "\n");
                     for (String dir : directions) {
-                        Command splitCommand = new Command(dir, steps);
+                        int currentSteps = steps;
+                        String currentDir = dir;
+
+                        // Обработка отрицательных шагов
+                        if (currentSteps < 0) {
+                            String correctedDirection;
+                            switch (currentDir) {
+                                case "N": correctedDirection = "S"; break;
+                                case "S": correctedDirection = "N"; break;
+                                case "E": correctedDirection = "W"; break;
+                                case "W": correctedDirection = "E"; break;
+                                default:
+                                    writer.write("Недопустимое направление: " + currentDir + "\n");
+                                    continue;
+                            }
+                            currentSteps = -currentSteps;
+                            writer.write("Отрицательные шаги преобразованы: " + currentDir + " " + (-steps) + "" +
+                                    " -> " + correctedDirection + " " + currentSteps + "\n");
+                            currentDir = correctedDirection;
+                        }
+
+                        Command splitCommand = new Command(currentDir, currentSteps);
                         robot.move(splitCommand);
-                        writer.write("Команда выполнена: " + dir + " " + steps + "\n");
+                        writer.write("Команда выполнена: " + currentDir + " " + currentSteps + "\n");
                         writer.write("Положение робота: (" + robot.getX() + ", " + robot.getY() + ")\n");
                     }
                 } catch (InvalidStepException e) {
