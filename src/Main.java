@@ -1,8 +1,8 @@
-package main;
-
 import robot.Robot;
 import robot.Command;
 import robot.RobotCommandProcessor;
+import exceptions.RobotException;
+import exceptions.InvalidSymbolException;
 
 import java.io.*;
 
@@ -11,8 +11,8 @@ import java.io.*;
  */
 public class Main {
     public static void main(String[] args) {
-        String inputFileName = "commands.txt";
-        String outputFileName = "result.txt";
+        String inputFileName = "files/commands.txt";
+        String outputFileName = "files/result.txt";
 
         try (
                 BufferedReader reader = new BufferedReader(new FileReader(inputFileName));
@@ -37,18 +37,26 @@ public class Main {
             String line;
             while ((line = reader.readLine()) != null) {
                 // Проверяем на команду завершения
-                if (line.equalsIgnoreCase("Q") || line.equalsIgnoreCase("X")) {
+                if (line.equals("Q") || line.equals("X")) {
                     break;
                 }
 
-                // Обработка команды (обработка исключений будет добавлена позже)
-                Command command = processor.parseCommand(line);
-                if (command != null) {
+                try {
+                    // Обработка команды
+                    Command command = processor.parseCommand(line);
                     robot.move(command);
                     writer.write("Команда выполнена: " + line + "\n");
                     writer.write("Положение робота: (" + robot.getX() + ", " + robot.getY() + ")\n");
-                } else {
-                    writer.write("Некорректная команда: " + line + "\n");
+                } catch (InvalidSymbolException e) {
+                    // Обработка исключения InvalidSymbolException
+                    writer.write("Ошибка при выполнении команды: " + line + "\n");
+                    writer.write("Описание ошибки: " + e.getMessage() + "\n");
+                    throw new RuntimeException(e.getMessage());
+                } catch (RobotException e) {
+                    // Обработка других исключений RobotException (будет добавлена позже)
+                    writer.write("Ошибка при выполнении команды: " + line + "\n");
+                    writer.write("Описание ошибки: " + e.getMessage() + "\n");
+                    throw new RuntimeException(e.getMessage());
                 }
                 writer.write("\n");
             }
