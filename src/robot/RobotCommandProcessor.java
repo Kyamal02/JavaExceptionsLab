@@ -16,16 +16,23 @@ public class RobotCommandProcessor {
         // Разбиваем строку на части по пробелам
         String[] parts = line.trim().split("\\s+");
         if (parts.length != 2) {
-            // Некорректный формат команды (обработка будет добавлена в следующих заданиях)
+            // Некорректный формат команды
             return null;
         }
 
         String direction = parts[0];
         String stepsStr = parts[1];
 
+        // Проверяем, что шаги представляют собой целое число
+        int steps;
+        try {
+            steps = Integer.parseInt(stepsStr);
+        } catch (NumberFormatException e) {
+            throw new InvalidStepException("Шаги не являются допустимым числом: " + stepsStr);
+        }
         // Проверка на несколько допустимых символов
         if (direction.matches("[NSEW]{2,}")) {
-            String[] individualDirections = direction.split(""); // Разделение на отдельные символы
+            String[] individualDirections = direction.split("");
             throw new MultipleDirectionsException(
                     "Обнаружено несколько направлений: " + direction,
                     individualDirections
@@ -54,7 +61,6 @@ public class RobotCommandProcessor {
         }
 
 
-        // Остальная часть кода (например, проверка шагов) будет добавлена позже
-        return new Command(direction, Integer.parseInt(stepsStr)); // временно возвращаем объект Command
+        return new Command(direction, steps);
     }
 }
