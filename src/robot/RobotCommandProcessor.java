@@ -19,11 +19,35 @@ public class RobotCommandProcessor {
      * @throws RobotException Если команда некорректна.
      */
     public Command parseCommand(String line) throws RobotException {
-        // Разбиваем строку на части по пробелам
         // Удаляем начальные и конечные пробелы и проверяем, что строка не пустая
         line = line.trim();
         if (line.isEmpty()) {
             throw new InvalidCommandFormatException("Пустая строка недопустима как команда.");
+        }
+
+        // Проверяем, содержит ли строка пробел
+        if (!line.contains(" ")) {
+            // Пытаемся разделить строку на направление и шаги без пробела
+            String directionPart = line.substring(0, 1);
+            String stepsPart = line.substring(1);
+
+            // Проверяем, что направление является буквой
+            if (directionPart.matches("[a-zA-Z]") && !stepsPart.isEmpty()) {
+                // Проверяем, что шаги являются числом
+                try {
+                    Integer.parseInt(stepsPart);
+                    String correctedCommand = directionPart + " " + stepsPart;
+                    throw new MissingSpaceException(
+                            "Отсутствует пробел между направлением и шагами в команде: " + line,
+                            correctedCommand
+                    );
+                } catch (NumberFormatException e) {
+                    // Шаги не являются числом, выбрасываем обычное исключение
+                    throw new InvalidCommandFormatException("Некорректный формат команды: " + line);
+                }
+            } else {
+                throw new InvalidCommandFormatException("Некорректный формат команды: " + line);
+            }
         }
 
         // Разбиваем строку на части по пробелам

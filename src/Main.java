@@ -44,6 +44,22 @@ public class Main {
                     robot.move(command);
                     writer.write("Команда выполнена: " + line + "\n");
                     writer.write("Положение робота: (" + robot.getX() + ", " + robot.getY() + ")\n");
+                } catch (MissingSpaceException e) {
+                    String correctedLine = e.getCorrectedCommand();
+                    writer.write("Исправление команды из-за отсутствия пробела: " + line + " на " + correctedLine + "\n");
+                    try {
+                        // Повторный парсинг с исправленной командой
+                        Command correctedCommand = processor.parseCommand(correctedLine);
+                        robot.move(correctedCommand);
+                        writer.write("Команда выполнена (после исправления): " + correctedCommand.getDirection() + " "
+                                + correctedCommand.getSteps() + "\n");
+                        writer.write("Положение робота: (" + robot.getX() + ", " + robot.getY() + ")\n");
+                    } catch (RobotException ex) {
+                        writer.write("Ошибка при обработке исправленной команды: " + correctedLine + "\n");
+                        writer.write("Описание: " + ex.getMessage() + "\n");
+                        throw ex;
+                    }
+
                 } catch (InvalidCommandFormatException e) {
                     writer.write("Некорректный формат команды: " + line + "\n");
                     writer.write("Описание: " + e.getMessage() + "\n");
@@ -114,7 +130,6 @@ public class Main {
                         robot.move(splitCommand);
                         writer.write("Команда выполнена: " + currentDir + " " + currentSteps + "\n");
                         writer.write("Положение робота: (" + robot.getX() + ", " + robot.getY() + ")\n");
-
                     }
                 } catch (InvalidStepException e) {
                     writer.write("Ошибка при выполнении команды: " + line + "\n");
